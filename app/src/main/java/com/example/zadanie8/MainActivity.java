@@ -40,23 +40,39 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private BookViewModel bookViewModel;
     public static final int NEW_BOOK_ACTIVITY_REQUEST_CODE = 1;
+    public static final int EDIT_BOOK_ACTIVITY_REQUEST_CODE = 2;
+    private Book editedBook = null;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == NEW_BOOK_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
-            Book book = new Book(data.getStringExtra(EditBookActivity.EXTRA_EDIT_BOOK_TITLE),
-                    data.getStringExtra(EditBookActivity.EXTRA_EDIT_BOOK_AUTHOR));
-            bookViewModel.insert(book);
-            Snackbar.make(findViewById(R.id.coordinator_layout), getString(R.string.book_added),
-                    Snackbar.LENGTH_LONG).show();
-        }else{
-            Snackbar.make(findViewById(R.id.coordinator_layout),
-                    getString(R.string.empty_not_saved),
-                    Snackbar.LENGTH_LONG)
-                    .show();
+        if (resultCode == RESULT_OK) {
+            if (requestCode == NEW_BOOK_ACTIVITY_REQUEST_CODE) {
+                Book book = new Book(data.getStringExtra(EditBookActivity.EXTRA_EDIT_BOOK_TITLE),
+                        data.getStringExtra(EditBookActivity.EXTRA_EDIT_BOOK_AUTHOR));
+                bookViewModel.insert(book);
+                Snackbar.make(findViewById(R.id.coordinator_layout),
+                                getString(R.string.book_added),
+                                Snackbar.LENGTH_LONG)
+                        .show();
+            }
+            else if (requestCode == EDIT_BOOK_ACTIVITY_REQUEST_CODE) {
+                editedBook.setTitle(data.getStringExtra(EditBookActivity.EXTRA_EDIT_BOOK_TITLE));
+                editedBook.setAuthor(data.getStringExtra(EditBookActivity.EXTRA_EDIT_BOOK_AUTHOR));
+                bookViewModel.update(editedBook);
+                editedBook = null;
+                Snackbar.make(findViewById(R.id.coordinator_layout),
+                                getString(R.string.book_edited),
+                                Snackbar.LENGTH_LONG)
+                        .show();
+            }
         }
+        else
+            Snackbar.make(findViewById(R.id.coordinator_layout),
+                            getString(R.string.empty_not_saved),
+                            Snackbar.LENGTH_LONG)
+                    .show();
     }
 
     @Override
@@ -119,8 +135,8 @@ public class MainActivity extends AppCompatActivity {
 
         public BookHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.book_list_item, parent, false));
-            //itemView.setOnClickListener(this);
-            //itemView.setOnLongClickListener(this);
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
 
             bookTitleTextView = itemView.findViewById(R.id.book_title);
             bookAuthorTextView = itemView.findViewById(R.id.book_author);
@@ -134,11 +150,11 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
- /*           MainActivity.this.editedBook = this.book;
+            MainActivity.this.editedBook = this.book;
             Intent intent = new Intent(MainActivity.this, EditBookActivity.class);
             intent.putExtra(EditBookActivity.EXTRA_EDIT_BOOK_TITLE, book.getTitle());
             intent.putExtra(EditBookActivity.EXTRA_EDIT_BOOK_AUTHOR, book.getAuthor());
-            startActivityForResult(intent, EDIT_BOOK_ACTIVITY_REQUEST_CODE); */
+            startActivityForResult(intent, EDIT_BOOK_ACTIVITY_REQUEST_CODE);
         }
 
         @Override
